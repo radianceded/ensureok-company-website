@@ -1,0 +1,33 @@
+name: 功能任务
+description: 提议或领取一个可验收的开发任务
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标
+      description: 用户最终应获得什么结果？
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 工作范围
+      description: 需要修改什么，不修改什么？
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      placeholder: |
+        - [ ] 标准一
+        - [ ] 标准二
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 设计或技术说明

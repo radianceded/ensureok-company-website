@@ -1,0 +1,220 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-brand: var(--font-noto-sans-sc);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+}
+
+:root {
+  color-scheme: dark;
+  --background: #1e1f1f;
+  --foreground: #fcf9f8;
+  --muted: #2a2b2b;
+  --muted-foreground: #9aa3a0;
+  --primary: #c8e6d9;
+  --primary-foreground: #1e1f1f;
+  --border: rgb(252 249 248 / 0.12);
+  --ring: #c8e6d9;
+  --radius: 0.4rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+    background: var(--background);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+.forest-static-texture {
+  opacity: 0.18;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.2'/%3E%3C/svg%3E");
+}
+
+.forest-vignette {
+  background:
+    radial-gradient(ellipse at center, transparent 48%, rgb(249 115 22 / 3%) 100%),
+    linear-gradient(to bottom, rgb(249 245 238 / 60%), transparent 40%, rgb(249 115 22 / 2%));
+}
+
+.ensureok-logo {
+  background-color: currentColor;
+  mask-image: url('/ensureok-logo.png');
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-image: url('/ensureok-logo.png');
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+}
+
+canvas {
+  touch-action: none;
+}
+
+/* Hide the Next.js 16 dev-mode DevTools floating button (bottom-left "N") */
+nextjs-portal {
+  display: none !important;
+}
+
+/* 保单扫描演示：扫描线 + 光带 + 识别结果弹出 */
+@keyframes scanline-sweep {
+  0% { top: 4%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 94%; opacity: 0; }
+}
+.scanline {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(200, 230, 217, 0.95), transparent);
+  box-shadow: 0 0 16px 4px rgba(200, 230, 217, 0.35);
+  animation: scanline-sweep 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes scanline-glow-sweep {
+  0% { top: 4%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { top: 94%; opacity: 0; }
+}
+.scanline-glow {
+  height: 56px;
+  background: linear-gradient(to bottom, transparent, rgba(200, 230, 217, 0.12), transparent);
+  animation: scanline-glow-sweep 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.pop-in {
+  animation: pop-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+/* Harness 编排面板：反向旋转环 */
+@keyframes spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+.animate-spin-reverse {
+  animation: spin-reverse 22s linear infinite;
+}
+
+/* Harness 编排核心：光点从四周流入中心（数据被驾驭汇聚） */
+@keyframes flow-in {
+  0% { transform: translate(var(--fx), var(--fy)) scale(1); opacity: 0; }
+  12% { opacity: 1; }
+  85% { opacity: 0.9; }
+  100% { transform: translate(0, 0) scale(0.3); opacity: 0.15; }
+}
+.flow-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(var(--fx), var(--fy));
+  animation: flow-in var(--dur, 2.4s) linear infinite;
+  box-shadow: 0 0 8px 2px rgba(200, 230, 217, 0.5);
+}
+
+/* Harness 层级：光点自上而下贯穿各层（一层一层） */
+@keyframes layer-flow {
+  0% { top: -6px; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.layer-flow {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  animation: layer-flow 2.2s linear infinite;
+  box-shadow: 0 0 8px 2px rgba(200, 230, 217, 0.5);
+}
+
+/* 轮播切换特效：上浮 + 淡入 + 模糊变清晰 */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(22px) scale(0.97); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.rise-in {
+  animation: rise-in 0.6s cubic-bezier(0.22, 0.9, 0.3, 1.05) both;
+}
+
+/* 右侧大字切换特效：从右滑入 */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(64px); filter: blur(4px); }
+  to { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+.slide-in-right {
+  animation: slide-in-right 0.55s cubic-bezier(0.22, 0.9, 0.3, 1.05) both;
+}
+
+/* Harness 滚动视觉：多层不同速度/方向的无缝滚动 */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes marquee-x-rev {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.marquee-fast {
+  display: inline-block;
+  animation: marquee-x 7s linear infinite;
+  will-change: transform;
+}
+.marquee-mid {
+  display: inline-block;
+  animation: marquee-x 13s linear infinite;
+  will-change: transform;
+}
+.marquee-rev {
+  display: inline-block;
+  animation: marquee-x-rev 17s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 导航水滴：绕弯（抛物线）落向菜单项文字——容器水平移动 + 水滴上抛叠加成弧线 */
+@keyframes drop-arc {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-26px) scale(0.9); }
+  100% { transform: translateY(0) scale(1); }
+}
