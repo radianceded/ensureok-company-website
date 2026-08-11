@@ -19,16 +19,16 @@ export type ForestTuning = {
 }
 
 const DEFAULT_TUNING: ForestTuning = {
-  pointScale: 2.2,
-  opacity: 1.0,
-  cameraSpeed: 2.8,
-  density: 1,
+  pointScale: 1.78,
+  opacity: 0.8,
+  cameraSpeed: 0.7,
+  density: 0.9,
   interactionRadius: 0.52,
   repulsion: 1.42,
   swirl: 1.18,
   depth: 0.86,
   velocity: 2.45,
-  fog: 0.12,
+  fog: 0.25,
 }
 
 function StaticForestFallback() {
@@ -39,7 +39,7 @@ function StaticForestFallback() {
   )
 }
 
-export function ParticleForest({ attract }: { attract?: MutableRefObject<{ value: number }> }) {
+export function ParticleForest({ attract, active = true }: { attract?: MutableRefObject<{ value: number }>; active?: boolean }) {
   const [isMobile, setIsMobile] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
   const [visible, setVisible] = useState(true)
@@ -80,13 +80,14 @@ export function ParticleForest({ attract }: { attract?: MutableRefObject<{ value
         {visible ? (
           <Canvas
             fallback={<StaticForestFallback />}
-            dpr={isMobile ? 1 : [1, 1.5]}
+            dpr={isMobile ? 1 : [1, 1.25]}
+            frameloop={active && !reducedMotion ? 'always' : 'demand'}
             camera={{ fov: 48, near: 0.06, far: 145, position: [0, 0.35, 3] }}
             gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
             onCreated={({ gl }) => gl.setClearColor('#1e1f1f', 1)}
           >
             <ParticleScene
-              pointCount={isMobile ? 76_000 : 190_000}
+              pointCount={isMobile ? 42_000 : 105_000}
               reducedMotion={reducedMotion}
               tuning={tuning}
               attract={attract}
