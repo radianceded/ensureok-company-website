@@ -14,17 +14,6 @@ export type ForestAttributes = {
   alphas: Float32Array
 }
 
-type Cluster = {
-  id: number
-  x: number
-  y: number
-  z: number
-  sx: number
-  sy: number
-  sz: number
-  type: 'foliage' | 'canopy' | 'root'
-}
-
 function mulberry32(seed: number) {
   return () => {
     let value = (seed += 0x6d2b79f5)
@@ -38,6 +27,12 @@ function signed(random: () => number) {
   return random() * 2 - 1
 }
 
+/**
+ * A calm, structureless particle volume. The former forest generator built
+ * trunks, canopy bands, and a central corridor; in perspective those masses
+ * read as a bright doorway behind the hero. This field deliberately avoids
+ * recognizable geometry and gently quiets the center for content legibility.
+ */
 export function createProceduralForest(count: number): ForestAttributes {
   const random = mulberry32(90421)
   const positions = new Float32Array(count * 3)
@@ -53,151 +48,53 @@ export function createProceduralForest(count: number): ForestAttributes {
   const alphas = new Float32Array(count)
 
   const volumeDepth = 120
-  const sectionCount = 24
-  const sectionDepth = volumeDepth / sectionCount
-  const clusters: Cluster[][] = []
-  let clusterNumber = 0
-
-  for (let section = 0; section < sectionCount; section += 1) {
-    const z = 1 - section * sectionDepth
-    const pathOffset = Math.sin(section * 0.61) * 0.9 + Math.sin(section * 0.19) * 0.45
-    const sectionClusters: Cluster[] = []
-
-    for (const side of [-1, 1]) {
-      for (let c = 0; c < 3; c += 1) {
-        sectionClusters.push({
-          id: clusterNumber++,
-          x: pathOffset + side * (7.1 + random() * 5.7),
-          y: -0.8 + c * 3.4 + signed(random) * 1.2,
-          z: z + signed(random) * 2.4,
-          sx: 1.8 + random() * 2.5,
-          sy: 1.4 + random() * 2.2,
-          sz: 1.8 + random() * 2.8,
-          type: 'foliage',
-        })
-      }
-    }
-
-    sectionClusters.push({
-      id: clusterNumber++,
-      x: pathOffset + signed(random) * 4.6,
-      y: 8.6 + random() * 2.2,
-      z: z + signed(random) * 2.3,
-      sx: 4.2 + random() * 3.4,
-      sy: 1.5 + random() * 1.8,
-      sz: 2.2 + random() * 2.8,
-      type: 'canopy',
-    })
-
-    for (const side of [-1, 1]) {
-      sectionClusters.push({
-        id: clusterNumber++,
-        x: pathOffset + side * (5.2 + random() * 5.8),
-        y: -7.7 + random() * 1.15,
-        z: z + signed(random) * 2.4,
-        sx: 3 + random() * 3.8,
-        sy: 0.5 + random() * 0.65,
-        sz: 2.1 + random() * 2.7,
-        type: 'root',
-      })
-    }
-
-    clusters.push(sectionClusters)
-  }
+  const halfWidth = 18
+  const halfHeight = 11
+  const cellWidth = 4.5
+  const cellHeight = 3.7
+  const cellDepth = 6
+  const xCells = Math.ceil((halfWidth * 2) / cellWidth)
+  const yCells = Math.ceil((halfHeight * 2) / cellHeight)
 
   for (let i = 0; i < count; i += 1) {
     const index = i * 3
-    const sectionIndex = Math.floor(random() * sectionCount)
-    const sectionZ = 1 - sectionIndex * sectionDepth
-    const pathOffset = Math.sin(sectionIndex * 0.61) * 0.9 + Math.sin(sectionIndex * 0.19) * 0.45
-    const kind = random()
-    const side = random() < 0.5 ? -1 : 1
-    let x = 0
-    let y = 0
-    let z = sectionZ + signed(random) * sectionDepth * 0.54
-    let size = 1.5
-    let light = 0.42
-    let alpha = 0.5
-    let layer = 0.5
-    let cluster = sectionClustersFor(clusters, sectionIndex, 0)
 
-    if (kind < 0.2) {
-      // Trunks lean along the corridor walls, giving the eye stable vertical landmarks.
-      const t = random()
-      const trunkSlot = Math.floor(random() * 3)
-      const baseX = pathOffset + side * (7.8 + trunkSlot * 2.25 + random() * 0.7)
-      x = baseX - side * t * (0.8 + random() * 1.7) + signed(random) * 0.17
-      y = -7.9 + t * 18.8 + signed(random) * 0.18
-      z += signed(random) * 0.22
-      size = 1.9 + random() * 2.3
-      light = 0.3 + random() * 0.42
-      alpha = 0.62 + random() * 0.16
-      layer = 0.72
-      cluster = sectionClustersFor(clusters, sectionIndex, side < 0 ? 0 : 3)
-    } else if (kind < 0.43) {
-      // Long branch arcs project over the path and visibly sweep past the camera.
-      const t = random()
-      const baseX = pathOffset + side * (9.2 + random() * 3.6)
-      const reach = 7.3 + random() * 5.2
-      x = baseX - side * reach * t + Math.sin(t * Math.PI * 2) * 0.38 + signed(random) * 0.16
-      y = 4.8 + random() * 4.1 + Math.sin(t * Math.PI) * (2.2 + random() * 2.8) + signed(random) * 0.18
-      z += (t - 0.5) * (3.5 + random() * 3.2) + signed(random) * 0.22
-      size = 1.65 + random() * 2.2
-      light = 0.36 + random() * 0.5
-      alpha = 0.56 + random() * 0.2
-      layer = 0.82
-      cluster = sectionClustersFor(clusters, sectionIndex, 6)
-    } else {
-      // Ellipsoidal clusters create coherent foliage, canopy, and root masses.
-      const choices = clusters[sectionIndex]
-      cluster = choices[Math.floor(random() * choices.length)]
-      const theta = random() * Math.PI * 2
-      const phi = Math.acos(signed(random))
-      const radius = Math.pow(random(), 0.58)
-      x = cluster.x + Math.sin(phi) * Math.cos(theta) * radius * cluster.sx
-      y = cluster.y + Math.cos(phi) * radius * cluster.sy
-      z = cluster.z + Math.sin(phi) * Math.sin(theta) * radius * cluster.sz
+    // Stratifying depth prevents accidental bright bands while retaining a
+    // natural random distribution across the visible x/y plane.
+    const depth = ((i + random()) / count) * volumeDepth
+    const x = signed(random) * halfWidth
+    const y = signed(random) * halfHeight
+    const z = 3 - depth
 
-      if (cluster.type === 'root') {
-        y += Math.sin(x * 0.45 + z * 0.27) * 0.28
-        size = 1.8 + random() * 2.6
-        light = 0.27 + random() * 0.46
-        alpha = 0.5 + random() * 0.2
-        layer = 0.88
-      } else {
-        size = 1.45 + random() * 2.35
-        light = 0.32 + random() * 0.64
-        alpha = 0.48 + random() * 0.24
-        layer = cluster.type === 'canopy' ? 0.78 : 0.66
-      }
-    }
+    // A soft radial falloff keeps the central copy and product visualization
+    // readable without creating a visible cut-out or another portal shape.
+    const radialDistance = Math.sqrt((x / halfWidth) ** 2 + (y / halfHeight) ** 2)
+    const centerQuiet = THREE.MathUtils.smoothstep(radialDistance, 0.08, 0.72)
+    const contentVisibility = 0.46 + centerQuiet * 0.54
 
-    // A sparse, irregular understory keeps the central route organic rather than empty.
-    if (i % 23 === 0) {
-      x = pathOffset + signed(random) * (2.1 + random() * 3.8)
-      y = -7.4 + random() * 4.8
-      z = 1 - random() * volumeDepth
-      size = 1.35 + random() * 2
-      light = 0.24 + random() * 0.36
-      alpha = 0.38 + random() * 0.18
-      layer = 0.38
-    }
+    const cellX = Math.floor((x + halfWidth) / cellWidth)
+    const cellY = Math.floor((y + halfHeight) / cellHeight)
+    const cellZ = Math.floor(depth / cellDepth)
+    const clusterId = cellZ * xCells * yCells + cellY * xCells + cellX
+    const centerX = -halfWidth + (cellX + 0.5) * cellWidth
+    const centerY = -halfHeight + (cellY + 0.5) * cellHeight
+    const centerZ = 3 - (cellZ + 0.5) * cellDepth
 
     positions[index] = x
     positions[index + 1] = y
     positions[index + 2] = z
-    sizes[i] = size
-    brightness[i] = THREE.MathUtils.clamp(light, 0, 1)
-    depthLayers[i] = layer
+    sizes[i] = 1.05 + random() * 1.45
+    brightness[i] = (0.24 + random() * 0.52) * contentVisibility
+    depthLayers[i] = 0.28 + random() * 0.5
     randoms[i] = random()
-    clusterIds[i] = cluster.id
-    clusterCenters[index] = cluster.x
-    clusterCenters[index + 1] = cluster.y
-    clusterCenters[index + 2] = cluster.z
+    clusterIds[i] = clusterId
+    clusterCenters[index] = centerX
+    clusterCenters[index + 1] = centerY
+    clusterCenters[index + 2] = centerZ
     motionPhases[i] = random() * Math.PI * 2
-    motionSpeeds[i] = 0.62 + random() * 0.78
+    motionSpeeds[i] = 0.38 + random() * 0.62
     colorVariations[i] = random()
-    alphas[i] = alpha
+    alphas[i] = (0.25 + random() * 0.3) * contentVisibility
   }
 
   return {
@@ -213,8 +110,4 @@ export function createProceduralForest(count: number): ForestAttributes {
     colorVariations,
     alphas,
   }
-}
-
-function sectionClustersFor(clusters: Cluster[][], section: number, index: number) {
-  return clusters[section][Math.min(index, clusters[section].length - 1)]
 }

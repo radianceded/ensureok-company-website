@@ -69,17 +69,7 @@ export function ForestPointCloud({
       uVolumeDepth: { value: 120 },
       uAttract: { value: 0 },
     }),
-    [
-      tuning.density,
-      tuning.depth,
-      tuning.fog,
-      tuning.interactionRadius,
-      tuning.opacity,
-      tuning.pointScale,
-      tuning.repulsion,
-      tuning.swirl,
-      tuning.velocity,
-    ],
+    [],
   )
 
   useFrame((state) => {

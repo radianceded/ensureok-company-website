@@ -23,7 +23,7 @@ export function HarnessPanel({
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => setReady(true), 1400)
+    const timer = setTimeout(() => setReady(true), 900)
     return () => clearTimeout(timer)
   }, [])
 
@@ -46,15 +46,18 @@ export function HarnessPanel({
             key={layer.en}
             className={`absolute left-1/2 rounded-lg border px-4 py-3 backdrop-blur-md transition-all duration-500 ${
               ready
-                ? 'border-[#c8e6d9]/75 bg-[#c8e6d9]/[0.7] shadow-[0_6px_0_-2px_rgba(200,230,217,0.35),0_14px_28px_rgba(0,0,0,0.5)]'
-                : 'border-white/30 bg-white/[0.6] shadow-[0_6px_0_-2px_rgba(255,255,255,0.1),0_14px_28px_rgba(0,0,0,0.5)]'
+                ? 'border-[#c8e6d9]/80 bg-[#c8e6d9]/[0.72]'
+                : 'border-white/40 bg-white/[0.62]'
             }`}
             style={{
               width: 272 - i * 16,
-              top: 10 + i * 28,
-              transform: `translateX(calc(-50% + ${i * 14}px))`,
+              top: 10 + i * 40,
+              transform: `translateX(calc(-50% + ${i * 26}px))`,
               opacity: 1 - i * 0.01,
               transitionDelay: `${i * 90}ms`,
+              boxShadow: ready
+                ? '0 -4px 0 rgba(118,168,148,1), 0 20px 34px rgba(0,0,0,0.6)'
+                : '0 -4px 0 rgba(148,149,150,0.9), 0 20px 34px rgba(0,0,0,0.6)',
             }}
           >
             <div className="flex items-center justify-between">
