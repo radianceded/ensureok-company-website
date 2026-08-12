@@ -151,7 +151,7 @@ export default function Page() {
   const hintRef = useRef<HTMLParagraphElement>(null)
   const heroRef = useRef<HTMLElement>(null)
   const siteRef = useRef<HTMLElement>(null)
-  const productMapRef = useRef<HTMLElement>(null)
+  const productMapRef = useRef<HTMLDivElement>(null)
   const section2Ref = useRef<HTMLElement>(null)
   const section3Ref = useRef<HTMLElement>(null)
   const section4Ref = useRef<HTMLElement>(null)
