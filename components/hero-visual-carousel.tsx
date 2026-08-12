@@ -21,12 +21,10 @@ type HeroVisualCarouselProps = {
  */
 export function HeroVisualCarousel({ labels, onIndexChange }: HeroVisualCarouselProps) {
   const [index, setIndex] = useState(0)
-  const [mounted, setMounted] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // 进入后先停在"保单分析"，6s 后开始自动轮播；手动点击后重新计时
   useEffect(() => {
-    setMounted(true)
     const startDelay = setTimeout(() => {
       timerRef.current = setInterval(() => setIndex((i) => (i + 1) % 3), 3000)
     }, 6000)
@@ -71,21 +69,19 @@ export function HeroVisualCarousel({ labels, onIndexChange }: HeroVisualCarousel
       )}
 
       {/* 指示点（可点击手动切换） */}
-      {mounted && (
-        <div className="absolute -bottom-9 left-1/2 flex -translate-x-1/2 items-center gap-2">
-          {[0, 1, 2].map((i) => (
-            <button
-              key={i}
-              type="button"
-              aria-label={`切换到面板 ${i + 1}`}
-              onClick={() => handleDotClick(i)}
-              className={`cursor-pointer rounded-full transition-all duration-400 ${
-                index === i ? 'h-1.5 w-5 bg-[#c8e6d9]' : 'h-1.5 w-1.5 bg-white/25 hover:bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-      )}
+      <div className="absolute -bottom-9 left-1/2 flex -translate-x-1/2 items-center gap-2">
+        {[0, 1, 2].map((i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`切换到面板 ${i + 1}`}
+            onClick={() => handleDotClick(i)}
+            className={`cursor-pointer rounded-full transition-all duration-400 ${
+              index === i ? 'h-1.5 w-5 bg-[#c8e6d9]' : 'h-1.5 w-1.5 bg-white/25 hover:bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   )
 }
