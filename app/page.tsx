@@ -1,11 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ArrowRight, ShieldCheck, Fish, FastForward, Rewind, House, Network, Cpu } from 'lucide-react'
+import { ChevronDown, ArrowRight, FastForward, Rewind, Building2, FileSearch, Flame, MessageSquare, Network, Scale } from 'lucide-react'
 import gsap from 'gsap'
 import { ParticleForest } from '@/components/particle-forest/particle-forest'
 import { HeroVisualCarousel } from '@/components/hero-visual-carousel'
-import { SemantixStory } from '@/components/semantix-story'
+import { ProductSystem } from '@/components/product-system'
+import { SiteFooter } from '@/components/site-footer'
+
+const SEMANTIX_URL = 'https://semantix.ensureok.ai/'
+const BAODUILE_URL = 'https://www.ensureok.ai/'
 
 type Locale = 'zh' | 'en'
 
@@ -37,7 +41,7 @@ const copy = {
     card2Title: '保叔',
     card2Desc: '更多产品详情，请联系我们。',
     card3Title: 'Shrimper',
-    card3Desc: '更多产品详情，请联系我们。',
+    card3Desc: '自研 N×N Agent 平台，支撑确石全线产品企业级落地。',
     ctaMore: '了解更多',
     productsTag: '我们的产品',
     scanning: '正在扫描保单…',
@@ -62,9 +66,9 @@ const copy = {
     navContact: 'Contact',
     heroTag: 'Queshi Intelligence · 确石智能',
     heroTitle1: 'Smarter AI inference',
-    heroTitle2: 'Lower cost · Greater accuracy',
-    heroDesc1: 'Queshi Intelligence builds LLM inference infra & intelligent analytics',
-    heroDesc2: 'Lowering inference cost, sharpening decision accuracy',
+    heroTitle2: 'Lower cost · Higher accuracy',
+    heroDesc1: 'LLM inference infra & intelligent analytics',
+    heroDesc2: 'Cut cost. Sharpen decisions.',
     pill1: 'LLM Cache Optimization',
     pill2: 'EnsureOK Assurance',
     ctaPrimary: 'Learn More',
@@ -79,7 +83,7 @@ const copy = {
     card2Title: '保叔',
     card2Desc: 'Contact us for product details.',
     card3Title: 'Shrimper',
-    card3Desc: 'Contact us for product details.',
+    card3Desc: 'Homegrown N×N Agent platform powering all EnsureOK products.',
     ctaMore: 'Learn more',
     productsTag: 'Our Products',
     scanning: 'Scanning policy…',
@@ -100,17 +104,17 @@ export default function Page() {
   const [locale, setLocale] = useState<Locale>('zh')
   const [entered, setEntered] = useState(false)
   const [carouselIndex, setCarouselIndex] = useState(0)
-  const [activeNav, setActiveNav] = useState<'home' | 'semantix' | 'baoduile' | 'baoshu' | 'shrimper'>('home')
+  const [activeNav, setActiveNav] = useState<'home' | 'baoduile' | 'baoshu' | 'shrimper'>('home')
   const [activeStep, setActiveStep] = useState(-1)
   const [expandedBrick, setExpandedBrick] = useState<string | null>(null)
   const [bricksGrown, setBricksGrown] = useState(false)
-  const [particlesActive, setParticlesActive] = useState(true)
+  const particlesActive = true
   const [ffActive, setFFActive] = useState<'forward' | 'backward' | null>(null)
   const [hoveredNav, setHoveredNav] = useState<(typeof NAV_KEYS)[number] | null>(null)
   const [lineCoords, setLineCoords] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
   const t = copy[locale]
 
-  const NAV_KEYS = ['home', 'semantix', 'baoduile', 'baoshu', 'shrimper', 'about'] as const
+  const NAV_KEYS = ['home', 'semantix', 'baoduile', 'baoshu', 'shrimper'] as const
 
   // 滚动联动：readingLine 检测当前所在产品页，activeNav 跟随
   useEffect(() => {
@@ -122,9 +126,8 @@ export default function Page() {
         { key: 'baoduile' as const, element: section2Ref.current },
         { key: 'baoshu' as const, element: section3Ref.current },
         { key: 'shrimper' as const, element: section4Ref.current },
-        { key: 'semantix' as const, element: semantixSectionRef.current },
       ]
-      let nextActive: 'home' | 'semantix' | 'baoduile' | 'baoshu' | 'shrimper' = 'home'
+      let nextActive: 'home' | 'baoduile' | 'baoshu' | 'shrimper' = 'home'
       for (const section of productSections) {
         if (section.element && readingLine >= section.element.offsetTop) {
           nextActive = section.key
@@ -152,7 +155,6 @@ export default function Page() {
   const section2Ref = useRef<HTMLElement>(null)
   const section3Ref = useRef<HTMLElement>(null)
   const section4Ref = useRef<HTMLElement>(null)
-  const semantixSectionRef = useRef<HTMLElement>(null)
   const demoVideoRef = useRef<HTMLVideoElement>(null)
   const ffTargetRef = useRef<number | null>(null) // 快进过渡目标时间
   const ffRafRef = useRef(0) // 快退 rAF 句柄
@@ -160,18 +162,6 @@ export default function Page() {
   const stepRefs = useRef<(HTMLDivElement | null)[]>([])
   const videoDurRef = useRef(0)
   const started = useRef(false)
-
-  useEffect(() => {
-    const semantixSection = semantixSectionRef.current
-    if (!semantixSection) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setParticlesActive(!entry.isIntersecting),
-      { threshold: 0.08 },
-    )
-    observer.observe(semantixSection)
-    return () => observer.disconnect()
-  }, [])
 
   // 保叔砖墙：滚动进入视口时，第三行（tall 砖）从 104px 逐渐长到 150px
   useEffect(() => {
@@ -377,11 +367,11 @@ export default function Page() {
               {t.langLabel}
             </button>
             <div className="hidden items-center gap-5 text-white/75 md:flex xl:gap-8">
-              {/* 菜单：下划线指示器（hover 跟随，active 常亮） */}
+              {/* 产品菜单：下划线指示器（hover 跟随，active 常亮） */}
               <div className="flex items-center gap-5 py-1 xl:gap-8">
-                {[t.navHome, t.navSemantix, t.navBaoduile, t.navBaoshu, t.navShrimper, t.navAbout].map((label, i) => {
+                {[t.navHome, t.navSemantix, t.navBaoduile, t.navBaoshu, t.navShrimper].map((label, i) => {
                   const key = NAV_KEYS[i]
-                  const active = activeNav === key
+                  const active = key !== 'semantix' && activeNav === key
                   const showIndicator = hoveredNav ? hoveredNav === key : active
                   return (
                     <button
@@ -396,8 +386,7 @@ export default function Page() {
                           window.scrollTo({ top: 0, behavior: 'smooth' })
                         }
                         if (key === 'semantix') {
-                          setActiveNav('semantix')
-                          semantixSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
+                          window.location.href = SEMANTIX_URL
                         }
                         if (key === 'baoduile') {
                           setActiveNav('baoduile')
@@ -427,24 +416,51 @@ export default function Page() {
                   )
                 })}
               </div>
-              <span className="cursor-pointer rounded-full bg-white px-[1.125rem] py-2 text-[13px] font-medium text-[#1e1f1f] transition hover:bg-[#ddf6ee]">
-                {t.navContact}
-              </span>
+
+              {/* 公司入口：关于我们 + 联系我们 */}
+              <div className="flex items-center gap-2.5 border-l border-white/15 pl-5 xl:pl-6">
+                <a
+                  href="/about"
+                  className="rounded-full border border-white/30 px-4 py-2 text-[13px] font-medium text-white/85 transition hover:border-white/60 hover:bg-white/5 hover:text-white"
+                >
+                  {t.navAbout}
+                </a>
+                <a
+                  href="/contact"
+                  className="rounded-full bg-white px-4 py-2 text-[13px] font-medium text-[#1e1f1f] transition hover:bg-[#ddf6ee]"
+                >
+                  {t.navContact}
+                </a>
+              </div>
             </div>
           </div>
         </nav>
 
         {/* Hero 区：左标语 — 中视觉轮播（扫描保单 ⇄ Harness 编排） */}
         <div className="relative flex flex-1 items-center justify-center">
-          {/* 左：品牌标语 */}
-          <div className="absolute left-10 top-1/2 max-w-sm -translate-y-1/2 text-left">
+          {/* 左：品牌标语（英文更长，收窄宽度并允许换行，避免被中部轮播挡住） */}
+          <div
+            className={`absolute left-6 top-1/2 z-10 -translate-y-1/2 text-left lg:left-10 ${
+              locale === 'en' ? 'w-[min(17rem,28vw)] max-w-[17rem]' : 'max-w-sm'
+            }`}
+          >
             <p className="text-[0.65rem] tracking-[0.3em] text-white/60 uppercase">{t.heroTag}</p>
-            <h2 className="mt-3 whitespace-nowrap text-5xl font-black leading-none tracking-tight text-white md:text-6xl">
+            <h2
+              className={`mt-3 font-black tracking-tight text-white ${
+                locale === 'en'
+                  ? 'text-[1.85rem] leading-[1.08] md:text-4xl xl:text-[2.75rem]'
+                  : 'whitespace-nowrap text-5xl leading-none md:text-6xl'
+              }`}
+            >
               {t.heroTitle1}
               <br />
               <span className="text-[#c8e6d9]">{t.heroTitle2}</span>
             </h2>
-            <p className="mt-4 text-[0.65rem] font-medium uppercase tracking-[0.35em] text-[#c8e6d9]">
+            <p
+              className={`mt-4 font-medium uppercase tracking-[0.28em] text-[#c8e6d9] ${
+                locale === 'en' ? 'text-[0.6rem] leading-relaxed' : 'text-[0.65rem] leading-relaxed'
+              }`}
+            >
               {t.heroDesc1}
               <br />
               {t.heroDesc2}
@@ -452,7 +468,7 @@ export default function Page() {
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <button
-                onClick={() => section2Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => productMapRef.current?.scrollIntoView({ behavior: 'smooth' })}
                 className="group inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-[#1e1f1f] transition hover:bg-white/90"
               >
                 {t.ctaPrimary}
@@ -511,11 +527,11 @@ export default function Page() {
           )}
         </div>
 
-        {/* 底部中央：向下滚动提示箭头（薄荷绿，贴近底部）——点击平滑滚动到第二屏 */}
+        {/* 底部中央：向下滚动提示箭头——先进入产品地图 */}
         <button
-          onClick={() => section2Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => productMapRef.current?.scrollIntoView({ behavior: 'smooth' })}
           className="pointer-events-auto absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer"
-          aria-label={t.langLabel === 'EN' ? 'Scroll to features' : '滚动到产品特性'}
+          aria-label={t.langLabel === 'EN' ? 'Scroll to product map' : '滚动到产品地图'}
         >
           <ChevronDown className="h-6 w-6 animate-bounce text-[#c8e6d9]" strokeWidth={2.2} />
         </button>
@@ -529,108 +545,17 @@ export default function Page() {
       </section>
       </div>
 
-      {/* 产品地图：两端产品，一套底座（抄自参考站第二屏） */}
-      <section
-        ref={productMapRef}
-        className="relative z-20 flex min-h-svh flex-col items-center justify-start px-4 pt-16 pb-14 sm:px-8"
-      >
-        <div className="map-reveal mx-auto max-w-3xl text-center">
-          <p className="text-sm tracking-[0.16em] text-[#dff3e8]">产品地图</p>
-          <h2 className="mt-3 font-brand text-3xl font-black tracking-tight text-white md:text-5xl">两端产品，<span className="text-[#c8e6d9]">一套底座</span></h2>
-          <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-relaxed text-white">从上往下读：先服务人，再落到把 Agent 真正跑起来的系统能力。</p>
-        </div>
-
-        <div className="mx-auto mt-6 w-full max-w-4xl">
-          <div className="map-reveal">
-            <p className="text-center text-xs tracking-[0.2em] text-white/80">应用层</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            {/* B 端 · 经纪人 — 保叔 */}
-            <button
-              type="button"
-              onClick={() => section3Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="group rounded-2xl border border-white/15 bg-[#121414]/80 p-4 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#c8e6d9]/50 hover:bg-[#161c1a]/90"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs tracking-[0.16em] text-[#e7f6ee]">B 端 · 经纪人</span>
-                <ShieldCheck className="h-5 w-5 text-[#c8e6d9] transition group-hover:scale-110" strokeWidth={1.5} />
-              </div>
-              <h3 className="mt-2 font-brand text-xl font-black text-[#c8e6d9]">保叔</h3>
-              <p className="mt-1 text-sm font-medium text-[#e7f6ee]">飞书里的 AI 同事</p>
-              <p className="mt-2 text-sm leading-relaxed text-white/90">内容、获客、方案与保单管理，嵌进日常工作流</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#e7f6ee]">
-                进入详情
-                <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-              </span>
-            </button>
-            {/* C 端 · 家庭 — 保对了 */}
-            <button
-              type="button"
-              onClick={() => section2Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="group rounded-2xl border border-white/15 bg-[#121414]/80 p-4 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#c8e6d9]/50 hover:bg-[#161c1a]/90"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs tracking-[0.16em] text-[#e7f6ee]">C 端 · 家庭</span>
-                <House className="h-5 w-5 text-[#c8e6d9] transition group-hover:scale-110" strokeWidth={1.5} />
-              </div>
-              <h3 className="mt-2 font-brand text-xl font-black text-[#c8e6d9]">保对了</h3>
-              <p className="mt-1 text-sm font-medium text-[#e7f6ee]">家庭保障 AI 助手</p>
-              <p className="mt-2 text-sm leading-relaxed text-white/90">看懂自己的保单、看清家庭保障，类目级规划建议，全程无销售压力</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#e7f6ee]">
-                进入详情
-                <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-              </span>
-            </button>
-            {/* Agent 智能体内核 — Semantix */}
-            <button
-              type="button"
-              onClick={() => section4Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="group rounded-2xl border border-white/15 bg-[#121414]/80 p-4 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#c8e6d9]/50 hover:bg-[#161c1a]/90"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs tracking-[0.16em] text-[#e7f6ee]">智能体内核</span>
-                <Cpu className="h-5 w-5 text-[#c8e6d9] transition group-hover:scale-110" strokeWidth={1.5} />
-              </div>
-              <h3 className="mt-2 font-brand text-xl font-black text-[#c8e6d9]">Semantix</h3>
-              <p className="mt-1 text-sm font-medium text-[#e7f6ee]">语义缓存 · 自我进化</p>
-              <p className="mt-2 text-sm leading-relaxed text-white/90">让每个 Agent 拥有持续进化的记忆与推理内核</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#e7f6ee]">
-                进入详情
-                <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-              </span>
-            </button>
-          </div>
-
-          {/* 应用层 → 底座层连接线（紧凑） */}
-          <div className="my-3 flex flex-col items-center gap-1" aria-hidden="true">
-            <span className="h-3 w-px bg-[#c8e6d9]/40" />
-            <span className="h-2 w-px bg-[#c8e6d9]/30" />
-            <span className="h-2 w-px bg-[#c8e6d9]/20" />
-          </div>
-          </div>
-
-          <div className="map-reveal">
-          <p className="text-center text-xs tracking-[0.2em] text-white/80">底座层</p>
-          {/* 运行时 · 开源内核 — Shrimper */}
-          <button
-            type="button"
-            onClick={() => section4Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-            className="group mt-3 w-full rounded-2xl border border-white/15 bg-[#121414]/80 p-4 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#c8e6d9]/50 hover:bg-[#161c1a]/90"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs tracking-[0.16em] text-[#e7f6ee]">运行时 · 开源内核</span>
-              <Network className="h-5 w-5 text-[#c8e6d9] transition group-hover:scale-110" strokeWidth={1.5} />
-            </div>
-            <h3 className="mt-2 font-brand text-xl font-black text-[#c8e6d9] md:text-2xl">Shrimper</h3>
-            <p className="mt-1 text-sm font-medium text-[#e7f6ee]">能力底座</p>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/90">企业级编排在上，自进化优化在下，支撑全线产品</p>
-            <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#e7f6ee]">
-              进入详情
-              <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-            </span>
-          </button>
-          </div>
-        </div>
-      </section>
+      {/* 产品地图：两端产品，一套底座 */}
+      <div ref={productMapRef}>
+        <ProductSystem
+          onBaoduile={() => section2Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+          onBaoshu={() => section3Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+          onShrimper={() => section4Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+          onSemantix={() => {
+            window.location.href = SEMANTIX_URL
+          }}
+        />
+      </div>
 
       {/* 第二屏：产品 01 — 保对了（智能投保）——左侧视频 demo + 右侧内容 */}
       <section ref={section2Ref} className="relative z-20 flex min-h-svh flex-col items-center justify-center px-8 py-24">
@@ -703,6 +628,7 @@ export default function Page() {
 
         {/* 右：内容块（上移） */}
         <div className="absolute right-16 top-[38%] w-[400px] -translate-y-1/2 text-left">
+          <p className="font-mono text-[10px] tracking-[0.24em] text-[#c8e6d9]/80">C 端 · 家庭个人</p>
           <h2
             className="mt-3 whitespace-nowrap text-5xl font-black font-brand leading-none tracking-tight text-white md:text-6xl"
           >
@@ -714,13 +640,22 @@ export default function Page() {
             看清家庭的保障
           </h3>
           <p className="mt-4 text-[0.65rem] font-medium uppercase tracking-[0.35em] leading-relaxed text-[#c8e6d9]">
-            面向家庭与个人的网站
+            面向家庭与个人
             <br />
             无需面对销售压力，看懂保单、看清缺口、
             <br />
             获得专业类目级规划建议。
           </p>
-          <button className="mt-8 rounded-full border border-white/40 px-8 py-3 text-sm font-medium text-white transition hover:bg-white/10">
+          <p className="mt-5 text-sm leading-relaxed text-white/55">
+            同一产品也覆盖企业端：创业公司可做经营风险体检，看清用工、出海与数据合规缺口。
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href = BAODUILE_URL
+            }}
+            className="mt-8 rounded-full border border-white/40 px-8 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+          >
             了解更多
           </button>
         </div>
@@ -791,6 +726,72 @@ export default function Page() {
         </div>
       </section>
 
+      {/* 保对了 · B 端：企业风险体检（来自 baoduile /business） */}
+      <section className="relative z-20 px-6 py-24 md:px-10 md:py-28">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="font-mono text-[11px] tracking-[0.28em] text-[#c8e6d9]">BAODUILE · BUSINESS</p>
+              <h3 className="mt-4 font-brand text-3xl font-black tracking-tight text-white md:text-5xl">
+                企业风险体检
+              </h3>
+              <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-white/65">
+                为创业公司与经营团队提供保障缺口判断：先选身份进入企业端，采集公司画像，生成可交互的风险热力图报告——不荐品、不施压，只把缺口说清楚。
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 font-mono text-[10px] tracking-[0.16em] text-[#c8e6d9]/85">
+              <span className="border border-[#c8e6d9]/30 px-3 py-1.5">劳动用工</span>
+              <span className="border border-[#c8e6d9]/30 px-3 py-1.5">出海合同</span>
+              <span className="border border-[#c8e6d9]/30 px-3 py-1.5">数据合规</span>
+            </div>
+          </div>
+
+          <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+              <Building2 className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+              <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">01 · PROFILE</p>
+              <h4 className="mt-2 font-brand text-xl font-black text-white">企业画像采集</h4>
+              <p className="mt-3 text-sm leading-relaxed text-white/55">
+                联系人档案 → 公司基本盘 → 三条需求线，结构化看清经营与保障现状。
+              </p>
+            </div>
+            <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+              <FileSearch className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+              <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">02 · PREVIEW</p>
+              <h4 className="mt-2 font-brand text-xl font-black text-white">确定性缺口预诊</h4>
+              <p className="mt-3 text-sm leading-relaxed text-white/55">
+                先给确定性缺口预览，可继续深挖补全，再决定是否领取完整报告。
+              </p>
+            </div>
+            <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+              <Flame className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+              <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">03 · HEATMAP</p>
+              <h4 className="mt-2 font-brand text-xl font-black text-white">风险热力图报告</h4>
+              <p className="mt-3 text-sm leading-relaxed text-white/55">
+                流式生成可交互保障体检报告，边生成边看，覆盖经营风险与保障缺口。
+              </p>
+            </div>
+            <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+              <MessageSquare className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+              <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">04 · HANDOFF</p>
+              <h4 className="mt-2 font-brand text-xl font-black text-white">转保叔继续深聊</h4>
+              <p className="mt-3 text-sm leading-relaxed text-white/55">
+                报告页可带着体检上下文进入对话，针对单条风险线继续追问与解读。
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-2xl text-sm leading-relaxed text-white/45">
+              路径：选择「为公司保障」→ 填写企业画像 → 领取完整体检报告 / 继续深挖 → 风险热力图 → 可选对接保叔解读。
+            </p>
+            <p className="shrink-0 font-mono text-[10px] tracking-[0.18em] text-[#c8e6d9]/70">
+              /business/checkup
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* 第三屏：产品 02 — 保叔：左右布局（左标题 / 右核心能力卡，间距小、卡片按内容有长有短） */}
       <section ref={section3Ref} className="relative z-20 flex min-h-svh flex-col items-center justify-center px-8">
         {/* 左：保叔标题 + 描述 + CTA */}
@@ -804,7 +805,7 @@ export default function Page() {
             一个顶一支助理团队
           </p>
           <p className="mt-4 text-[0.65rem] font-medium uppercase tracking-[0.35em] text-[#c8e6d9]">
-            来自友邦 · 永达理 · 明亚 · 大童的顶尖经纪人
+            内容 · 获客 · 方案 · 保单管理
           </p>
           <button className="mt-8 rounded-full border border-white/40 px-8 py-3 text-sm font-medium text-white transition hover:bg-white/10">
             了解更多
@@ -900,32 +901,100 @@ export default function Page() {
         </div>
       </section>
 
-      {/* 第四屏：产品 03 — Shrimper（虾产业数字化） */}
-      <section ref={section4Ref} className="relative z-20 flex min-h-svh flex-col items-center justify-center px-8 py-24">
-        <div className="max-w-3xl text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/60">ENSUREOK PRODUCT 03</p>
-          <h2 className="mt-4 text-4xl font-black leading-none tracking-tight text-white md:text-6xl">
-            Shrimper
-          </h2>
-          <p className="mt-3 text-[0.65rem] font-medium uppercase tracking-[0.35em] text-[#c8e6d9]">SHRIMPER · 智慧养虾</p>
-          <p className="mx-auto mt-6 max-w-xl text-white/70">
-            从虾苗到餐桌的全链路数字化管理，让每一只虾可溯源。占位文案 — 待补充。
-          </p>
-          <div className="mt-10 flex justify-center">
-            <div className="flex h-44 w-44 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] backdrop-blur-sm">
-              <Fish className="h-16 w-16 text-[#c8e6d9]" strokeWidth={1.5} />
+      {/* 第四屏：Shrimper — 技术底座 / N×N Agent 平台 */}
+      <section ref={section4Ref} className="relative z-20 px-6 py-24 md:px-10 md:py-28">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="max-w-3xl">
+            <p className="font-mono text-[11px] tracking-[0.28em] text-[#c8e6d9]">TECHNICAL FOUNDATION</p>
+            <h2 className="mt-4 font-brand text-4xl font-black tracking-tight text-white md:text-6xl">
+              Shrimper
+            </h2>
+            <p className="mt-3 font-brand text-xl font-bold text-[#c8e6d9] md:text-2xl">
+              技术底座 · 自研 N×N Agent 平台
+            </p>
+            <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-white/65">
+              支撑确石全线产品。从「个人能用」到「企业能用」，中间隔着的不是简单扩容，而是一整套重新设计的运行时架构。
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 border border-white/12 bg-white/[0.03] px-6 py-8 md:grid-cols-[0.9fr_1.1fr] md:px-10 md:py-10">
+            <div>
+              <p className="font-mono text-[10px] tracking-[0.24em] text-[#c8e6d9]/80">WHY SHRIMPER</p>
+              <h3 className="mt-4 font-brand text-2xl font-black tracking-tight text-white md:text-3xl">
+                为什么需要
+                <br />
+                Shrimper
+              </h3>
+            </div>
+            <div className="space-y-4 text-[15px] leading-relaxed text-white/65">
+              <p>
+                当下全球最强的开源 AI Agent 引擎，几乎都是为个人开发者设计的 —— 一个人、一个 Agent、一个进程。
+              </p>
+              <p>
+                但真实的企业场景是 <span className="font-semibold text-[#c8e6d9]">N×N</span> 的：N 个用户、N 种角色、N 个渠道、N 种业务流程。
+              </p>
+              <p className="text-white/80">
+                Shrimper 就是确石智能对这一问题的系统化答案。
+              </p>
             </div>
           </div>
-          <button className="mt-10 rounded-full border border-white/40 px-8 py-3 text-sm font-medium text-white transition hover:bg-white/10">
-            了解更多
-          </button>
+
+          <div className="mt-10">
+            <div className="mb-5 flex items-center gap-4">
+              <span className="font-mono text-[10px] tracking-[0.24em] text-[#c8e6d9]/80">TECHNICAL CAPABILITIES</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
+              <span className="font-mono text-[10px] tracking-[0.16em] text-white/35">技术能力</span>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+                <Network className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+                <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">01 · MULTI-TENANT</p>
+                <h3 className="mt-2 font-brand text-xl font-black text-white">多租户运行时</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/55">
+                  基于分布式任务队列的多用户并发架构，支持大量用户同时使用、互不干扰。用户级数据严格隔离，商业敏感信息绝不交叉泄露。
+                </p>
+              </div>
+              <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+                <FileSearch className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+                <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">02 · PER-USER MEMORY</p>
+                <h3 className="mt-2 font-brand text-xl font-black text-white">Per-user 动态档案</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/55">
+                  每位用户拥有专属的、随交互演化的 AI 上下文。Agent 越用越懂你，而不是每次对话都重置。
+                </p>
+              </div>
+              <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+                <Flame className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+                <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">03 · PROACTIVE PUSH</p>
+                <h3 className="mt-2 font-brand text-xl font-black text-white">主动推送能力</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/55">
+                  AI 不只被动响应，可基于时间、事件、状态主动发起对话 —— 定期提醒、异常报警、跟进推送，让 Agent 真正具备「同事感」。
+                </p>
+              </div>
+              <div className="border border-white/12 bg-white/[0.03] px-5 py-6">
+                <Scale className="h-5 w-5 text-[#c8e6d9]" strokeWidth={1.5} />
+                <p className="mt-5 font-mono text-[10px] tracking-[0.2em] text-[#c8e6d9]/70">04 · ENGINE ABSTRACTION</p>
+                <h3 className="mt-2 font-brand text-xl font-black text-white">引擎抽象与可演进</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/55">
+                  Shrimper 与底层 AI 引擎解耦。无论 Agent 引擎如何演进，确石的产品都能持续受益于最新的技术能力。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 border-t border-white/10 pt-10">
+            <p className="font-mono text-[10px] tracking-[0.24em] text-[#c8e6d9]/80">VALUE</p>
+            <h3 className="mt-4 max-w-3xl font-brand text-2xl font-black tracking-tight text-white md:text-3xl">
+              Shrimper 带来的价值
+            </h3>
+            <p className="mt-5 max-w-3xl text-[15px] leading-relaxed text-white/65">
+              对客户而言，Shrimper 意味着确石的产品具备真正的企业级品质 —— 不是 Demo，不是玩具，而是可以承载真实业务、扛得住真实流量的生产级系统。这是保叔能稳定服务大量保险经纪人的根本原因。
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* 第五屏：Semantix — 巨型编辑感字标 + 交互式能力叙事 */}
-      <section ref={semantixSectionRef} className="relative z-30">
-        <SemantixStory />
-      </section>
+      <SiteFooter />
     </main>
   )
 }
